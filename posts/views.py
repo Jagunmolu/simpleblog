@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 
-
+@api_view(http_method_names=['GET'])
 def homepage(request:Request):
     response = {'message': 'This is a function-based view and it is only temporary.'}
     return Response(data=response, status=status.HTTP_200_OK)
