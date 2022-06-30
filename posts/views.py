@@ -1,7 +1,4 @@
-import imp
-import re
-from tkinter.messagebox import RETRY
-from urllib import response
+from django.shortcuts import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
@@ -51,18 +48,46 @@ def list_posts(request:Request):
 
 @api_view(http_method_names=['GET'])
 def list_post_by_id(request:Request, id:int):
-    post = Post.objects.get(id=id)
+    post = get_object_or_404(Post, id=id)
 
     serializer = PostSerializer(instance=post)
 
-    # if not serializer:
-    #     return Response(serializer.error)
+    response = {
+        'message': f'Post number {id}',
+        'data': serializer.data
+    }
 
-    return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-# @api_view(http_method_names=['PUT'])
-# def edit_post(request:Request, id:int):
+    return Response(data=response, status=status.HTTP_200_OK)
 
-#     data = request.data
-#     response = {'message': 'Post created successfully', 'data': data}
-#     return Response(data=response, status=status.HTTP_201_CREATED)
+@api_view(http_method_names=['PUT'])
+def update_post(request:Request, id:int):
+
+    post = get_object_or_404(Post, id=id)
+
+    data = request.data
+
+    serializer = PostSerializer(instance=post, data=data)
+
+    if serializer.is_valid():
+
+        serializer.save()
+
+        response = {
+            'message': f'Post number {id} updated successfully',
+            'data': serializer.data
+        }
+
+        return Response(data=response, status=status.HTTP_200_OK)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(http_method_names=['DELETE'])
+def delete_post(request:Request, id:int):
+
+    post = get_object_or_404(Post, id=id)
+
+    post.delete()
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
