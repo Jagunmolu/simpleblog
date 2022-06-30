@@ -21,13 +21,33 @@ def homepage(request:Request):
     response = {'message': 'This is a function-based view and it is only temporary.'}
     return Response(data=response, status=status.HTTP_200_OK)
 
-@api_view(http_method_names=['GET'])
+@api_view(http_method_names=['GET', 'POST'])
 def list_posts(request:Request):
     posts = Post.objects.all()
 
+    if request.method == 'POST':
+        data = request.data
+
+        serializer = PostSerializer(data=data)
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+            response = {'message': 'Post created successfully', 'data': serializer.data}
+
+            return Response(data=response, status=status.HTTP_201_CREATED)
+
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     serializer = PostSerializer(instance=posts, many=True)
 
-    return Response(data=serializer.data, status=status.HTTP_200_OK)
+    response = {
+        'message': 'All Posts',
+        'data': serializer.data
+    }
+
+    return Response(data=response, status=status.HTTP_200_OK)
 
 @api_view(http_method_names=['GET'])
 def list_post_by_id(request:Request, id:int):
@@ -35,8 +55,8 @@ def list_post_by_id(request:Request, id:int):
 
     serializer = PostSerializer(instance=post)
 
-    if not serializer:
-        return Response(serializer.error)
+    # if not serializer:
+    #     return Response(serializer.error)
 
     return Response(data=serializer.data, status=status.HTTP_200_OK)
 
