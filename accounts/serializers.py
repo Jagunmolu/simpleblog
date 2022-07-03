@@ -16,8 +16,8 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
 
-        email_exists = User.objects.filter(email=attrs['email']).exists
-        username_exists = User.objects.filter(username=attrs['username']).exists
+        email_exists = User.objects.filter(email=attrs['email']).exists()
+        username_exists = User.objects.filter(username=attrs['username']).exists()
 
         if email_exists and username_exists:
             raise ValidationError('Email and Username have been used')
@@ -26,3 +26,10 @@ class SignUpSerializer(serializers.ModelSerializer):
         if username_exists:
             raise ValidationError('Username has been used')
         return super().validate(attrs)
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = super().create(validated_data)
+        user.set_password(password)
+        user.save()
+        return user
