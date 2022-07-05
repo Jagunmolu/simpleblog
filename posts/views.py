@@ -16,7 +16,7 @@ from .serializers import PostSerializer
 class PostListCreateView(generics.ListCreateAPIView):
 
     serializer_class = PostSerializer
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     queryset = Post.objects.all()
 
     # def get(self, request:Request, *args, **kwargs):
